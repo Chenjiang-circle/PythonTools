@@ -124,7 +124,7 @@ class ExtractUrl(multithreading_crawler.TaskManager):
             print(e)
             print(link, 'error!')
         finally:
-            # 将结果写入文件
+            # 将完成的任务url和id写入文件
             self.thread_lock.acquire()
             with open(self.output_dir + '/over.txt', 'a+', encoding='utf-8') as over_file:
                 over_file.write(str(index) + ',' + link + '\n')
