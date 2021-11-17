@@ -7,11 +7,11 @@ import os
 import requests
 from bs4 import BeautifulSoup
 
-import multithreading_crawler
+from multithreading_crawler import TaskManager
 import url_tools
 
 
-class ExtractUrl(multithreading_crawler.TaskManager):
+class ExtractUrl(TaskManager):
     """多线程爬取网页并提取其中的超链接
 
     ExtractUrl类继承了TaskManager类，并实现了acquire_task和do_task方法。
@@ -132,6 +132,6 @@ class ExtractUrl(multithreading_crawler.TaskManager):
 
 
 if __name__ == '__main__':
-    extract_url = ExtractUrl('./task-list.txt', '.')
+    extract_url = ExtractUrl('../Example/task-list.txt', '.')
     extract_url.obtain_links()
     extract_url.run()

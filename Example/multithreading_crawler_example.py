@@ -8,7 +8,11 @@ method to start your program.
 
 import requests
 
-import multithreading_crawler
+import sys
+
+sys.path.append('../Crawler/')
+
+from Crawler.multithreading_crawler import TaskManager
 
 tasks = []
 
@@ -18,7 +22,7 @@ with open('./task-list.txt', 'r', encoding='utf-8') as f:
         tasks.append(line.strip('\n'))
 
 
-class MyCrawler(multithreading_crawler.TaskManager):
+class MyCrawler(TaskManager):
 
     def acquire_task(self):
         if len(tasks) > 0:
