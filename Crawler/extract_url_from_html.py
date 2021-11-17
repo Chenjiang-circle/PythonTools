@@ -12,20 +12,50 @@ import url_tools
 
 
 class ExtractUrl(multithreading_crawler.TaskManager):
+    """多线程爬取网页并提取其中的超链接
+
+    ExtractUrl类继承了TaskManager类，并实现了acquire_task和do_task方法。
+    使用该类进行提取网页超链接时，只需要在实例化时传入“links_file”和“output_dir”两个参数。按顺序分别调用obtain_links方法和run方法，
+    便可启动程序，输入要创建的线程数，程序便会根据links_file中的链接，为线程分配任务。
+
+    example:
+
+    extract_url = ExtractUrl('./list.txt', '.')
+
+    extract_url.obtain_links()
+
+    extract_url.run()
+
+    Attributes:
+        links_file: 存储所有要爬取的页面对应的链接的文件路径
+        links_file: 存储所有要爬取的页面对应的链接的文件路径
+        output_dir: 提取出来的超链接的输出路径
+        links: 所有要爬取的页面对应的链接列表
+        task_id: 每个线程分配到的任务编号
+    """
 
     def __init__(self, links_file: str, output_dir: str):
+        """构造函数
+
+        :param links_file: 存储所有要爬取的页面对应的链接的文件路径
+        :param output_dir: 提取出来的超链接的输出路径
+        """
         super().__init__()
         self.links_file = links_file
         self.output_dir = output_dir
         self.links = []
-        self.index = -1
-        if not os.path.exists(output_dir):
+        self.task_id = -1
+        if not os.path.exists(output_dir):  # 如果输出文件夹不存在，就创建
             os.mkdir(output_dir)
         # 创建记录已完成任务的文件
         with open(self.output_dir + '/over.txt', 'a+', encoding='utf-8') as over_file:
             over_file.close()
 
     def obtain_links(self):
+        """读取存储链接的文件，将链接存储到links列表中
+
+        :raises FileNotFoundError: 类实例化时传递的参数links_file对应的文件不存在
+        """
         # 默认读取txt文件
         with open(self.links_file, 'r', encoding='utf-8') as links_file:
             links = links_file.readlines()
@@ -33,13 +63,29 @@ class ExtractUrl(multithreading_crawler.TaskManager):
                 self.links.append(link.strip('\n'))
 
     def acquire_task(self):
+        """线程获取任务的方法
+
+        线程在获得锁之后，执行该方法。在执行完该方法之后，对应的线程会释放对应的锁。
+
+        :return:
+            如果还有链接没有被分配给线程，返回一个Tuple类型数据，其中第一个元素为表示链接的str类型数据，
+            第二个元组为表示该线程的任务id的int类型数据。如果没有剩余链接可以分配，返回None
+        """
         if len(self.links) > 0:
-            self.index += 1
-            return self.links.pop(), self.index
+            self.task_id += 1
+            return self.links.pop(), self.task_id
         else:
             return None
 
     def do_task(self, task):
+        """每个线程执行的任务
+
+        线程根据分配到的任务，使用requests库爬取相应链接的页面，之后使用BeautifulSoup解析HTML，获取页面中的超链接，
+        并根据指定的输出目录，将超链接写入文件中。
+
+        :param task: Tuple类型，线程要执行的任务信息，包括要爬取的链接、任务id
+        :return: None
+        """
         link = task[0]
         index = task[1]
         headers = {
