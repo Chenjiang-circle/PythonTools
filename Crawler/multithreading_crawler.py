@@ -50,7 +50,7 @@ class MultithreadingCrawler(threading.Thread):
     def run(self):
         print('thread starts! thread_id: ', self.thread_id)
         while self.flag:
-            # Mutex
+            # Mutex。 互斥访问acquire_task()方法
             self.tread_lock.acquire()
             # the thread acquire task from taskManager. 获取任务
             self.task = self.task_manager.acquire_task()
