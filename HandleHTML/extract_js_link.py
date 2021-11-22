@@ -81,26 +81,38 @@ class ExtractJsLink(TaskManager):
         contents = []
         soup = BeautifulSoup(open(self.html_file_dir + '/' + task, 'rb'), 'lxml')
         a_tags = soup.findAll('a')
-        for a_tag in a_tags:
-            contents.append(a_tag.get('href'))
+        if len(a_tags) > 1:
+            for a_tag in a_tags:
+                if a_tag.get('href'):
+                    contents.append(a_tag.get('href'))
         script_tags = soup.findAll('script')
-        for script_tag in script_tags:
-            contents.append(script_tag.get('src'))
+        if len(script_tags) > 1:
+            for script_tag in script_tags:
+                if script_tag.get('src'):
+                    contents.append(script_tag.get('src'))
         link_tags = soup.findAll('link')
-        for link_tag in link_tags:
-            if link_tag.get('type') == 'text/javascript':
-                contents.append(link_tag.get('href'))
-        span_tags = soup.findAll('span')
-        for span_tag in span_tags:
-            contents.append(span_tag.contents)
-        td_tags = soup.findAll('td')
-        for td_tag in td_tags:
-            if td_tag.string:
-                contents.append(td_tag.string)
+        if len(link_tags) > 1:
+            for link_tag in link_tags:
+                if link_tag.get('type') == 'text/javascript':
+                    if link_tag.get('href'):
+                        contents.append(link_tag.get('href'))
+        # span_tags = soup.findAll('span')
+        # for span_tag in span_tags:
+        #     contents.append(span_tag.contents)
+        # td_tags = soup.findAll('td')
+        # for td_tag in td_tags:
+        #     if td_tag.string:
+        #         contents.append(td_tag.string)
 
         prefix_name, suffix_name = os.path.splitext(task)
+        if len(contents) < 1:
+            return
         with open(self.output_dir + '/' + prefix_name + '.txt', 'a+', encoding='utf-8') as f:
             for content in contents:
-                if '.js' in content:
-                    f.write(content + '\n')
+                try:
+                    if '.js' in content:
+                        f.write(content + '\n')
+                except Exception as e:
+                    print(e)
+                    print(content, contents)
 
