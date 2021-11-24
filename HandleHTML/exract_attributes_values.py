@@ -71,7 +71,7 @@ class ExtractAttributesValues(TaskManager):
             with open(self.file_dir + '/' + task, 'r', encoding='utf-8') as f:
                 html = f.read()
             result = pattern.findall(html)
-            if len(result) > 0:  # 如果匹配到注释，将注释输出
+            if len(result) > 0:
                 # print(result)
                 if not os.path.exists(self.output_dir + '/' + attribute):
                     os.mkdir(self.output_dir + '/' + attribute)
