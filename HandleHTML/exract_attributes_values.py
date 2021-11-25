@@ -45,6 +45,7 @@ class ExtractAttributesValues(TaskManager):
         self.file_list = []
         if not os.path.exists(self.output_dir):  # 如果输出路径不存在，就创建该文件夹
             os.mkdir(self.output_dir)
+        self.patterns = []
 
     def acquire_task(self):
         if len(self.file_list) > 0:
@@ -64,13 +65,15 @@ class ExtractAttributesValues(TaskManager):
         if len(self.attributes) < 1:
             print('待提取属性为空！')
             return
-        for attribute in self.attributes:
-            pattern_str = r'\s+' + attribute + '="(.*?)?"'
-            pattern = re.compile(pattern_str)
-            html = None
+        for index, attribute in enumerate(self.attributes):
+            # pattern_str = r'\s+' + attribute + '="(.*?)?"'
+            # pattern = re.compile(pattern_str)
+            html_lines = None
+            result = []
             with open(self.file_dir + '/' + task, 'r', encoding='utf-8') as f:
-                html = f.read()
-            result = pattern.findall(html)
+                html_lines = f.readlines()
+            for line in html_lines:
+                result.extend(self.patterns[index].findall(line))
             if len(result) > 0:
                 # print(result)
                 if not os.path.exists(self.output_dir + '/' + attribute):
@@ -87,3 +90,6 @@ class ExtractAttributesValues(TaskManager):
         :return: None
         """
         self.file_list = os.listdir(self.file_dir)
+        for attribute in self.attributes:  # 编译好所有的匹配模式
+            pattern_str = r'\s+' + attribute + '="(.*?)?"'
+            self.patterns.append(re.compile(pattern_str))
